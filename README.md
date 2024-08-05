@@ -8,8 +8,14 @@
 
 A [Composer](https://getcomposer.org/) package for [PHP](https://www.php.net/) that adds a seriously simple progress tracker, with a focus on estimating completion time.
 
-```sh
-# '[50% - 250 / 500][~ 1h 20m 47s remaining]'
+```php
+<?php
+
+use Othyn\TimeRemaining\TimeRemaining;
+
+$timeRemaining = new TimeRemaining(100);
+$formattedProgress = $timeRemaining->getFormattedProgress(50);
+echo $formattedProgress; // Output: [50% - 50 / 100][~ 0h 0m 30s remaining]
 ```
 
 The package is available on Packagist as [othyn/php-time-remaining](https://packagist.org/packages/othyn/php-time-remaining).
