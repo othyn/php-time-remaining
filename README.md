@@ -14,6 +14,8 @@ A [Composer](https://getcomposer.org/) package for [PHP](https://www.php.net/) t
 use Othyn\TimeRemaining\TimeRemaining;
 
 $timeRemaining = new TimeRemaining(100);
+sleep(30); // Simulate some work being done.
+
 $formattedProgress = $timeRemaining->getFormattedProgress(50);
 echo $formattedProgress; // Output: [50% - 50 / 100][~ 0h 0m 30s remaining]
 ```
