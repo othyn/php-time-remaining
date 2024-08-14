@@ -86,18 +86,23 @@ final class TimeRemainingUnitTest extends TestCase
     {
         $currentItem = 50;
         $remainingSeconds = 3600;
-        $formatted = $this->timeRemaining->format($currentItem, $remainingSeconds, '[%d%% - %d / %d items][~ %dh %dm %ds remaining]');
-        $this->assertEquals('[50% - 50 / 100 items][~ 1h 0m 0s remaining]', $formatted);
+
+        $formatted = $this->timeRemaining->format($currentItem, $remainingSeconds, '[%d%% - %d / %d items][~ %dh %dm %ds remaining][est. %s]');
+        $this->assertMatchesRegularExpression('/\[50% - 50 \/ 100 items\]\[~ 1h 0m 0s remaining\]\[est\. \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/', $formatted);
     }
 
     public function test_get_formatted_progress(): void
     {
         $currentItem = 50;
         usleep(500000);
+
         $formattedProgress = $this->timeRemaining->getFormattedProgress($currentItem);
         $this->assertStringContainsString('[50% - 50 / 100]', $formattedProgress);
         $this->assertStringContainsString('~', $formattedProgress);
         $this->assertStringContainsString('remaining', $formattedProgress);
+        $this->assertStringContainsString('[est. ', $formattedProgress);
+
+        $this->assertMatchesRegularExpression('/\[est\. \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/', $formattedProgress);
     }
 
     public function test_changing_total_items(): void
@@ -105,7 +110,59 @@ final class TimeRemainingUnitTest extends TestCase
         $this->timeRemaining->setTotalItems(200);
         $currentItem = 50;
         usleep(500000);
+
         $formattedProgress = $this->timeRemaining->getFormattedProgress($currentItem);
         $this->assertStringContainsString('[25% - 50 / 200]', $formattedProgress);
+        $this->assertStringContainsString('[est. ', $formattedProgress);
+
+        $this->assertMatchesRegularExpression('/\[est\. \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/', $formattedProgress);
+    }
+
+    public function test_format_with_estimated_completion_datetime(): void
+    {
+        $currentItem = 50;
+        $remainingSeconds = 3600;
+
+        $formatted = $this->timeRemaining->format($currentItem, $remainingSeconds, '[%d%% - %d / %d items][~ %dh %dm %ds remaining][est. %s]');
+        $this->assertMatchesRegularExpression('/\[50% - 50 \/ 100 items\]\[~ 1h 0m 0s remaining\]\[est\. \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/', $formatted);
+    }
+
+    public function test_get_formatted_progress_with_estimated_completion_datetime(): void
+    {
+        $currentItem = 50;
+        usleep(500000);
+
+        $formattedProgress = $this->timeRemaining->getFormattedProgress($currentItem);
+        $this->assertStringContainsString('[50% - 50 / 100]', $formattedProgress);
+        $this->assertStringContainsString('~', $formattedProgress);
+        $this->assertStringContainsString('remaining', $formattedProgress);
+        $this->assertStringContainsString('[est. ', $formattedProgress);
+
+        $this->assertMatchesRegularExpression('/\[est\. \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/', $formattedProgress);
+    }
+
+    public function test_format_with_custom_date_format(): void
+    {
+        $this->timeRemaining->setDateFormat('d/m/Y H:i');
+        $currentItem = 50;
+        $remainingSeconds = 3600;
+
+        $formatted = $this->timeRemaining->format($currentItem, $remainingSeconds, '[%d%% - %d / %d items][~ %dh %dm %ds remaining][est. %s]');
+        $this->assertMatchesRegularExpression('/\[50% - 50 \/ 100 items\]\[~ 1h 0m 0s remaining\]\[est\. \d{2}\/\d{2}\/\d{4} \d{2}:\d{2}\]/', $formatted);
+    }
+
+    public function test_get_formatted_progress_with_custom_date_format(): void
+    {
+        $this->timeRemaining->setDateFormat('d/m/Y H:i');
+        $currentItem = 50;
+        usleep(500000);
+
+        $formattedProgress = $this->timeRemaining->getFormattedProgress($currentItem);
+        $this->assertStringContainsString('[50% - 50 / 100]', $formattedProgress);
+        $this->assertStringContainsString('~', $formattedProgress);
+        $this->assertStringContainsString('remaining', $formattedProgress);
+        $this->assertStringContainsString('[est. ', $formattedProgress);
+
+        $this->assertMatchesRegularExpression('/\[est\. \d{2}\/\d{2}\/\d{4} \d{2}:\d{2}\]/', $formattedProgress);
     }
 }
